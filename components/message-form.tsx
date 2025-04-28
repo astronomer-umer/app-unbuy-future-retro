@@ -69,6 +69,3 @@ export function MessageForm({ sellerId, productId }: MessageFormProps) {
     </form>
   )
 }
-
-\
-Let's update the message list component to ensure it uses the correct color scheme:

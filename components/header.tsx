@@ -22,7 +22,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold">
-            LetGo Clone
+            unBuy
           </Link>
 
           {/* Search Bar - Hidden on mobile */}
@@ -33,7 +33,7 @@ export default function Header() {
                 placeholder="Search for anything..."
                 className="w-full py-2 px-4 rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-secondary"
               />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+              <button title="search" className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
                 <Search size={20} />
               </button>
             </div>

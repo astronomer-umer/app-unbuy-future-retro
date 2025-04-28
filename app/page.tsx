@@ -38,8 +38,8 @@ export default async function Home() {
     <main className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="bg-primary text-white rounded-lg p-8 mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">Find, Buy, Sell</h1>
-        <p className="text-xl mb-6">Your one-stop marketplace for all your needs</p>
+        <h1 className="text-4xl font-bold mb-4">Where Pre-loved Meets Re-loved.</h1>
+        <p className="text-xl mb-6">Find, buy or sell anything, anytime, anywhere!</p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/search" className="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium">
             Browse Listings
