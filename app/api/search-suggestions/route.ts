@@ -1,12 +1,12 @@
-import { prisma } from "@/lib/db"
+import { prisma } from "@/lib/db";
 
 export async function GET(request: Request) {
-     const { searchParams } = new URL(request.url)
-     const query = searchParams.get("query") || ""
+     const { searchParams } = new URL(request.url);
+     const query = searchParams.get("query") || "";
 
      if (!query) {
-          return new Response(JSON.stringify({ suggestions: [] }), { status: 200 })
-     }
+       return new Response(JSON.stringify({ suggestions: [] }), { status: 200 });
+  }
 
      const suggestions = await prisma.product.findMany({
           where: {
@@ -18,11 +18,24 @@ export async function GET(request: Request) {
           select: {
                id: true,
                title: true,
-          },
-          take: 5, // Limit the number of suggestions
-     })
+         images: {
+              select: {
+                   url: true,
+              },
+              take: 1,
+         },
+       },
+       take: 5, // Limit the number of suggestions
+  });
 
-     return new Response(JSON.stringify({ suggestions: suggestions.map((s) => ({ id: s.id, name: s.title })) }), {
-          status: 200,
-     })
+     return new Response(
+          JSON.stringify({
+               suggestions: suggestions.map((s) => ({
+                    id: s.id,
+                    name: s.title,
+                    image: s.images[0]?.url || null,
+               })),
+          }),
+          { status: 200 }
+     );
 }

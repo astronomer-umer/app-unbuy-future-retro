@@ -1,139 +1,117 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { signIn } from "next-auth/react";
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+export default function LoginPopup({ onClose }: { onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      })
-
-      if (result?.error) {
-        setError("Invalid email or password")
-      } else {
-        router.push("/")
-        router.refresh()
-      }
-    } catch (error) {
-      setError("Something went wrong. Please try again.")
-    } finally {
-      setLoading(false)
+  const handleProviderLogin = async (provider: string) => {
+    const result = await signIn(provider, { redirect: false });
+    if (result?.error) {
+      console.error("Login error:", result.error);
+      alert("Login failed. Please try again.");
+    } else if (result?.ok) {
+      window.location.href = result.url || "/dashboard"; // Redirect to dashboard after login
     }
-  }
+  };
+
+  const handleSignUpRedirect = () => {
+    window.location.href = "/register"; // Redirect to the registration page
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle sign-in logic here
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md space-y-8 rounded-lg border p-6 shadow-md">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Sign in to your account</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Or{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
-              create a new account
-            </Link>
-          </p>
-        </div>
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div
+        className="absolute inset-0 backdrop-blur-sm bg-lime-800 bg-opacity-30"
+        onClick={onClose} // Close modal when clicking outside
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.8 }}
+        className="bg-gradient-to-bl from-lime-200 via-lime-100 to-blue-200 p-6 rounded-lg shadow-lg relative w-full max-w-md"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-1 right-2 text-blue-800 text-base font-bold hover:text-lime-700"
+        >
+          ✕
+        </button>
+        <h1 className="text-2xl font-bold text-lime-900 mb-2">Sign in to your account</h1>
+        <div className="py-3 px-10">
 
-        {error && <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm"
-              />
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            >
-              {loading ? "Signing in..." : "Sign in"}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-            >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                <path
-                  d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.79-1.677-4.184-2.702-6.735-2.702-5.522 0-10 4.478-10 10s4.478 10 10 10c8.396 0 10.249-7.85 9.426-11.748l-9.426 0.082z"
-                  fill="#4285F4"
+          <div className="text-center">
+            {/* <p className="text-sm text-lime-900">Or sign in with your email:</p> */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-left font-bold  text-lime-900">Email:</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-2 border border-lime-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your email"
                 />
-              </svg>
-              Google
-            </button>
-          </div>
-        </div>
-      </div>
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-left font-bold  text-lime-900">Password:</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-2 border border-lime-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your password"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-900 text-white py-2 mt-4 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Sign in
+              </button>
+            </form>
+            <div className="mt-6 space-y-2">
+              <button
+                onClick={() => handleProviderLogin("google")}
+                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
+              >
+                Sign in with Google
+              </button>
+              <button
+                onClick={() => handleProviderLogin("instagram")}
+                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
+              >
+                Sign in with Instagram
+              </button>
+              <button
+                onClick={() => handleProviderLogin("microsoft")}
+                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
+              >
+                Sign in with Microsoft
+              </button>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-lime-900">Don't have an account?</p>
+              <button
+                onClick={handleSignUpRedirect}
+                className="text-blue-500 underline hover:text-blue-700"
+              >
+                Sign Up
+              </button>
+            </div>
+          </div></div>
+      </motion.div>
     </div>
-  )
+  );
 }

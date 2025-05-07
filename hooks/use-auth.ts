@@ -11,23 +11,12 @@ export function useAuth() {
 
   const user = session?.user
 
-  const signIn = async (provider: string, credentials?: Record<string, string>, callbackUrl?: string) => {
-    setIsLoading(true)
-    try {
-      if (provider === "credentials" && credentials) {
-        return await nextAuthSignIn("credentials", {
-          redirect: false,
-          ...credentials,
-        })
-      }
-      return await nextAuthSignIn(provider, {
-        callbackUrl: callbackUrl || "/dashboard",
-        redirect: provider !== "credentials",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const signIn = async (provider: string, options?: Record<string, any>) => {
+    return await nextAuthSignIn(provider, {
+      ...options,
+      redirect: false, // Ensure no redirection occurs
+    });
+  };
 
   const signOut = async () => {
     setIsLoading(true)

@@ -66,10 +66,12 @@ export function ImageUpload({ value, onChange, maxFiles = 5 }: ImageUploadProps)
     onChange(newImages)
   }
 
+  const safeValue = value || [];
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {value.map((url, index) => (
+        {safeValue.map((url, index) => (
           <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
             <Image src={url || "/placeholder.svg"} alt={`Uploaded image ${index + 1}`} fill className="object-cover" />
             <Button
@@ -83,7 +85,7 @@ export function ImageUpload({ value, onChange, maxFiles = 5 }: ImageUploadProps)
             </Button>
           </div>
         ))}
-        {value.length < maxFiles && (
+        {safeValue.length < maxFiles && (
           <div className="relative aspect-square rounded-md border border-dashed flex flex-col items-center justify-center">
             <Upload className="h-6 w-6 mb-2 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">{isUploading ? "Uploading..." : "Upload Image"}</p>
@@ -99,5 +101,5 @@ export function ImageUpload({ value, onChange, maxFiles = 5 }: ImageUploadProps)
         )}
       </div>
     </div>
-  )
+  );
 }

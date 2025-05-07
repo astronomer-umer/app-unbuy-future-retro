@@ -13,25 +13,6 @@ import { useToast } from "@/components/ui/use-toast"
 import { ImageUpload } from "@/components/image-upload"
 import { useSession } from "next-auth/react"
 
-const categories = [
-  { id: "electronics", name: "Electronics" },
-  { id: "furniture", name: "Furniture" },
-  { id: "clothing", name: "Clothing" },
-  { id: "vehicles", name: "Vehicles" },
-  { id: "toys", name: "Toys & Games" },
-  { id: "sports", name: "Sports" },
-  { id: "books", name: "Books" },
-  { id: "jewelry", name: "Jewelry" },
-]
-
-const conditions = [
-  { id: "new", name: "New" },
-  { id: "like_new", name: "Like New" },
-  { id: "good", name: "Good" },
-  { id: "fair", name: "Fair" },
-  { id: "poor", name: "Poor" },
-]
-
 export default function SellPage() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -41,6 +22,7 @@ export default function SellPage() {
   const [location, setLocation] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [categories, setCategories] = useState([])
   const router = useRouter()
   const { toast } = useToast()
   const { status } = useSession()
@@ -50,6 +32,16 @@ export default function SellPage() {
       router.push("/login?callbackUrl=/sell")
     }
   }, [status, router])
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const response = await fetch("/api/categories")
+      const data = await response.json()
+      setCategories(data)
+    }
+
+    fetchCategories()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

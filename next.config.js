@@ -8,7 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["localhost", "placeholder.com"],
+    domains: ["localhost", "unbuy.vercel.app"],
     unoptimized: true,
   },
 }

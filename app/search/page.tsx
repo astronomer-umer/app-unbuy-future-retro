@@ -4,6 +4,13 @@ import { ProductCard } from "@/components/product-card"
 import { SearchFilters } from "@/components/search-filters"
 import { SearchPagination } from "@/components/search-pagination"
 import { SearchSkeleton } from "@/components/search-skeleton"
+import { pipeline } from "@huggingface/inference";
+import { cosineSimilarity } from "@/lib/utils";
+
+// Initialize Hugging Face pipeline for embeddings
+const embeddingPipeline = pipeline("feature-extraction", {
+  model: "sentence-transformers/all-MiniLM-L6-v2",
+});
 
 interface SearchPageProps {
   searchParams: {
@@ -38,77 +45,46 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
   )
 }
 
-async function SearchResults({ searchParams }: SearchPageProps) {
-  const query = searchParams.query || ""
-  const category = searchParams.category || ""
-  const sort = searchParams.sort || "newest"
-  const page = Number.parseInt(searchParams.page || "1")
-  const limit = Number.parseInt(searchParams.limit || "20")
-  const skip = (page - 1) * limit
+async function SearchResults({ searchParams }: { searchParams: SearchPageProps['searchParams'] }) {
+  const { query = "", category = "", sort = "newest", page = "1", limit = "20" } = searchParams;
 
-  // Build where clause
-  const where: any = {
-    status: "AVAILABLE",
+  const parsedPage = Number.parseInt(page);
+  const parsedLimit = Number.parseInt(limit);
+  const skip = (parsedPage - 1) * parsedLimit;
+
+  // Generate query embedding
+  let queryEmbedding = [];
+  try {
+    queryEmbedding = await embeddingPipeline(query);
+  } catch (error) {
+    console.error("Error generating query embedding:", error);
   }
 
-  if (category) {
-    where.category = category
-  }
-
-  if (query) {
-    where.OR = [
-      {
-        title: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-      {
-        description: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-    ]
-  }
-
-  // Build orderBy
-  let orderBy: any = {}
-  switch (sort) {
-    case "newest":
-      orderBy = { createdAt: "desc" }
-      break
-    case "oldest":
-      orderBy = { createdAt: "asc" }
-      break
-    case "price_high":
-      orderBy = { price: "desc" }
-      break
-    case "price_low":
-      orderBy = { price: "asc" }
-      break
-    default:
-      orderBy = { createdAt: "desc" }
-  }
-
-  // Get products
-  const products = await prisma.product.findMany({
-    where,
+  // Fetch all products and calculate similarity
+  const allProducts = await prisma.product.findMany({
+    where: { status: "AVAILABLE" },
     include: {
-      images: {
-        take: 1,
-      },
+      images: { take: 1 },
       user: true,
     },
-    orderBy,
-    skip,
-    take: limit,
-  })
+  });
+
+  const productsWithSimilarity = allProducts.map((product) => {
+    const productEmbedding = product.embedding || [];
+    const similarity = cosineSimilarity(queryEmbedding, productEmbedding);
+    return { ...product, similarity };
+  });
+
+  // Filter and sort products by similarity
+  const filteredProducts = productsWithSimilarity
+    .filter((product) => product.similarity > 0.5) // Adjust threshold as needed
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(skip, skip + parsedLimit);
 
   // Get total count
-  const total = await prisma.product.count({ where })
+  const total = filteredProducts.length;
 
-  if (products.length === 0) {
+  if (filteredProducts.length === 0) {
     return (
       <div className="text-center py-10">
         <h2 className="text-xl font-semibold">No items found</h2>
@@ -116,22 +92,22 @@ async function SearchResults({ searchParams }: SearchPageProps) {
           Try adjusting your search or filter to find what you're looking for.
         </p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground">
-          Showing {skip + 1}-{Math.min(skip + limit, total)} of {total} results
+          Showing {skip + 1}-{Math.min(skip + parsedLimit, total)} of {total} results
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      <SearchPagination total={total} limit={limit} />
+      <SearchPagination total={total} limit={parsedLimit} />
     </div>
-  )
+  );
 }

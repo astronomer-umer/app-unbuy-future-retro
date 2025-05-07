@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-gray-800 text-white py-6">
+    <footer className="via-lime-100 from-blue-100 bg-gradient-to-br to-blue-200 text-lime-900 p-4 shadow-md">
       <div className="container mx-auto flex flex-wrap justify-between items-center">
         <p className="text-sm">&copy; 2025 unBuy. All rights reserved.</p>
         <nav className="flex gap-4 text-sm">

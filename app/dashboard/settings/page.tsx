@@ -12,11 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2 } from "lucide-react"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 export default function SettingsPage() {
   const { data: session, update } = useSession()
   const [name, setName] = useState(session?.user?.name || "")
   const [email, setEmail] = useState(session?.user?.email || "")
+  const [profilePicture, setProfilePicture] = useState(session?.user?.image || "")
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -37,6 +39,7 @@ export default function SettingsPage() {
         body: JSON.stringify({
           name,
           email,
+          profilePicture,
         }),
       })
 
@@ -52,6 +55,7 @@ export default function SettingsPage() {
           ...session?.user,
           name,
           email,
+          image: profilePicture,
         },
       })
 
@@ -159,6 +163,10 @@ export default function SettingsPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="profilePicture">Profile Picture</Label>
+              <ImageUpload value={profilePicture} onChange={setProfilePicture} maxFiles={1} />
             </div>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (

@@ -8,14 +8,18 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const categories = [
-  { id: "electronics", name: "Electronics" },
-  { id: "furniture", name: "Furniture" },
-  { id: "clothing", name: "Clothing" },
-  { id: "vehicles", name: "Vehicles" },
-  { id: "toys", name: "Toys & Games" },
-  { id: "sports", name: "Sports" },
-  { id: "books", name: "Books" },
-  { id: "jewelry", name: "Jewelry" },
+  { id: "electronics", name: "Electronics", subCategories: ["Phones", "Laptops", "Cameras"] },
+  { id: "furniture", name: "Furniture", subCategories: ["Sofas", "Beds", "Tables"] },
+  { id: "clothing", name: "Clothing", subCategories: ["Men", "Women", "Kids"] },
+  { id: "vehicles", name: "Vehicles", subCategories: ["Cars", "Bikes", "Trucks"] },
+  { id: "toys", name: "Toys & Games", subCategories: ["Action Figures", "Board Games", "Puzzles"] },
+  { id: "sports", name: "Sports", subCategories: ["Fitness", "Outdoor", "Team Sports"] },
+  { id: "books", name: "Books", subCategories: ["Fiction", "Non-Fiction", "Comics"] },
+  { id: "jewelry", name: "Jewelry", subCategories: ["Necklaces", "Rings", "Bracelets"] },
+  { id: "home", name: "Home & Garden", subCategories: ["Decor", "Tools", "Appliances"] },
+  { id: "beauty", name: "Beauty", subCategories: ["Makeup", "Skincare", "Haircare"] },
+  { id: "music", name: "Music", subCategories: ["Instruments", "Albums", "Accessories"] },
+  { id: "art", name: "Art", subCategories: ["Paintings", "Sculptures", "Crafts"] },
 ]
 
 const conditions = [
@@ -61,7 +65,6 @@ export function SearchFilters({ currentCategory }: SearchFiltersProps) {
 
   const handleCategoryChange = (categoryId: string, checked: boolean) => {
     if (currentCategory) {
-      // If we're already on a category page, redirect to search with the category
       router.push(
         `/search?${createQueryString({
           category: checked ? categoryId : null,
@@ -138,13 +141,22 @@ export function SearchFilters({ currentCategory }: SearchFiltersProps) {
             <AccordionContent>
               <div className="space-y-2">
                 {categories.map((category) => (
-                  <div key={category.id} className="flex items-center space-x-2">
+                  <div key={category.id} className="flex flex-col space-y-1">
                     <Checkbox
                       id={`category-${category.id}`}
                       checked={searchParams.get("category") === category.id}
                       onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
                     />
                     <Label htmlFor={`category-${category.id}`}>{category.name}</Label>
+                    {category.subCategories.map((sub) => (
+                      <div key={sub} className="ml-4">
+                        <Checkbox
+                          id={`subcategory-${sub}`}
+                          onCheckedChange={(checked) => handleCategoryChange(sub, checked as boolean)}
+                        />
+                        <Label htmlFor={`subcategory-${sub}`}>{sub}</Label>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>

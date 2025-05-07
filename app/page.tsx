@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db"
 import ProductCard from "@/components/product-card"
 import CategoryCard from "@/components/category-card"
 import ProductCardSkeleton from "@/components/product-card-skeleton"
+import SellButton from "@/components/SellButton"
 
 export default async function Home() {
   const session = await getServerSession(authOptions)
@@ -24,53 +25,38 @@ export default async function Home() {
     },
   })
 
-  // Define categories
-  const categories = [
-    { id: "electronics", name: "Electronics", icon: "📱" },
-    { id: "furniture", name: "Furniture", icon: "🛋️" },
-    { id: "clothing", name: "Clothing", icon: "👕" },
-    { id: "vehicles", name: "Vehicles", icon: "🚗" },
-    { id: "toys", name: "Toys & Games", icon: "🧸" },
-    { id: "sports", name: "Sports", icon: "⚽" },
-  ]
+  // Fetch categories dynamically
+  const categories = await prisma.category.findMany({
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+    },
+  })
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main className="container mx-auto px-6 py-8">
       {/* Hero Section */}
-      <section className="bg-primary text-white rounded-lg p-8 mb-12 text-center">
+      <section className="bg-primary bg-gradient-to-tr to-blue-400 via-blue-900 from-lime-900 text-white rounded-lg p-8 mb-12 text-center">
         <h1 className="text-4xl font-bold mb-4">Where Pre-loved Meets Re-loved.</h1>
         <p className="text-xl mb-6">Find, buy or sell anything, anytime, anywhere!</p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link href="/search" className="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium">
-            Browse Listings
+            Browse Stuff
           </Link>
-          {!session ? (
-            <Link
-              href="/login"
-              className="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-md font-medium"
-            >
-              Sign In to Sell
-            </Link>
-          ) : (
-            <Link
-              href="/sell"
-              className="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-md font-medium"
-            >
-              Sell Something
-            </Link>
-          )}
+          <SellButton />
         </div>
       </section>
 
       {/* Categories Section */}
-      <section className="mb-12">
+      <section className="mb-12 mx-6 px-6 py-6 bg-gradient-to-b to-lime-50 from-lime-100 shadow-xl ">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Browse Categories</h2>
+          <h2 className="text-2xl font-bold">Categories</h2>
           <Link href="/categories" className="text-primary hover:underline">
             View All
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
@@ -78,9 +64,9 @@ export default async function Home() {
       </section>
 
       {/* Featured Products Section */}
-      <section>
+      <section className="mb-12 mx-6 px-6 py-6 bg-gradient-to-b to-lime-50 from-lime-100 shadow-xl ">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Featured Listings</h2>
+          <h2 className="text-2xl font-bold">Featured</h2>
           <Link href="/search" className="text-primary hover:underline">
             View All
           </Link>

@@ -1,60 +1,50 @@
-import type React from "react"
-import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
-import { SessionProvider } from "@/components/session-provider"
+"use client";
 
-const inter = Inter({ subsets: ["latin"] })
+import type React from "react";
+import { Inter } from "next/font/google";
+import "../styles/globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { SessionProvider } from "@/components/session-provider";
+import { useEffect, useState } from "react";
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
-}
-
-export const metadata: Metadata = {
-  title: "UB - Buy & Sell Locally",
-  description: "A modern platform for buying and selling items locally",
-  keywords: ["marketplace", "buy", "sell", "local", "secondhand", "ecommerce"],
-  authors: [{ name: "UB Team" }],
-  creator: "UB",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "/",
-    title: "UB - Buy & Sell Locally",
-    description: "A modern platform for buying and selling items locally",
-    siteName: "UB",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "UB - Buy & Sell Locally",
-    description: "A modern platform for buying and selling items locally",
-  },
-    generator: 'v0.dev'
-}
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000); // Simulated loading delay
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <html lang="en">
+        <body className="preloader-container">
+          <div className="preloader-content">
+            <img src="/logo.png" alt="Unbuy Logo" className="logo" />
+            <h1 className="brand-title">unBuy</h1>
+            <p className="brand-tagline">Where Pre-loved Meets Re-loved.</p>
+            <div className="loader"></div>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`min-h-screen flex flex-col ${inter.className}`}>
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <div className="flex min-h-screen flex-col">
+            <div className="flex flex-col flex-grow">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 p-6">{children}</main>
               <Footer />
             </div>
             <Toaster />
@@ -62,5 +52,5 @@ export default function RootLayout({
         </SessionProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Send } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
   id: string
@@ -91,28 +92,36 @@ export function ConversationMessages({
   return (
     <div className="flex flex-col h-[600px]">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => {
-          const isCurrentUser = message.senderId === currentUserId
+        <AnimatePresence initial={false}>
+          {messages.map((message) => {
+            const isCurrentUser = message.senderId === currentUserId
 
-          return (
-            <div key={message.id} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
-              <div className={`flex gap-2 max-w-[80%] ${isCurrentUser ? "flex-row-reverse" : ""}`}>
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={message.sender.image || ""} alt={message.sender.name || "User"} />
-                  <AvatarFallback>{message.sender.name?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div
-                    className={`rounded-lg p-3 ${isCurrentUser ? "bg-primary text-primary-foreground" : "bg-muted"}`}
-                  >
-                    <p>{message.content}</p>
+            return (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+              >
+                <div className={`flex gap-2 max-w-[80%] ${isCurrentUser ? "flex-row-reverse" : ""}`}>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={message.sender.image || ""} alt={message.sender.name || "User"} />
+                    <AvatarFallback>{message.sender.name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div
+                      className={`rounded-lg p-3 ${isCurrentUser ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+                    >
+                      <p>{message.content}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{formatDate(message.createdAt)}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{formatDate(message.createdAt)}</p>
                 </div>
-              </div>
-            </div>
-          )
-        })}
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
       <div className="border-t p-4">

@@ -12,11 +12,13 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { Loader2 } from "lucide-react"
+import { ImageUpload } from "@/components/image-upload"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [profilePicture, setProfilePicture] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -36,6 +38,7 @@ export default function RegisterPage() {
           name,
           email,
           password,
+          profilePicture,
         }),
       })
 
@@ -123,6 +126,10 @@ export default function RegisterPage() {
                   required
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="profilePicture">Profile Picture</Label>
+                <ImageUpload value={profilePicture} onChange={setProfilePicture} maxFiles={1} />
+              </div>
               <Button type="submit" disabled={isButtonDisabled}>
                 {isSubmitting ? (
                   <>
@@ -151,6 +158,26 @@ export default function RegisterPage() {
               </>
             ) : (
               "Google"
+            )}
+          </Button>
+          <Button variant="outline" type="button" onClick={() => signIn("instagram")} disabled={isButtonDisabled}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Instagram"
+            )}
+          </Button>
+          <Button variant="outline" type="button" onClick={() => signIn("microsoft")} disabled={isButtonDisabled}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Microsoft"
             )}
           </Button>
         </div>

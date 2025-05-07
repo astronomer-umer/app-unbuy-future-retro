@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
-import { ImageUpload } from "@/components/image-upload"
-import { useSession } from "next-auth/react"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { ImageUpload } from "@/components/image-upload";
+import { useSession } from "next-auth/react";
+import { use } from "react";
 
 const categories = [
   { id: "electronics", name: "Electronics" },
@@ -22,7 +22,7 @@ const categories = [
   { id: "sports", name: "Sports" },
   { id: "books", name: "Books" },
   { id: "jewelry", name: "Jewelry" },
-]
+];
 
 const conditions = [
   { id: "new", name: "New" },
@@ -30,44 +30,45 @@ const conditions = [
   { id: "good", name: "Good" },
   { id: "fair", name: "Fair" },
   { id: "poor", name: "Poor" },
-]
+];
 
 const statuses = [
   { id: "AVAILABLE", name: "Available" },
   { id: "SOLD", name: "Sold" },
   { id: "RESERVED", name: "Reserved" },
-]
+];
 
-export default function EditListingPage({ params }: { params: { id: string } }) {
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [price, setPrice] = useState("")
-  const [category, setCategory] = useState("")
-  const [condition, setCondition] = useState("")
-  const [location, setLocation] = useState("")
-  const [status, setStatus] = useState("")
-  const [images, setImages] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(true)
-  const router = useRouter()
-  const { toast } = useToast()
-  const { data: session, status: sessionStatus } = useSession()
+export default function EditListingPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise); // Unwrap params with React.use
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [condition, setCondition] = useState("");
+  const [location, setLocation] = useState("");
+  const [status, setStatus] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const router = useRouter();
+  const { toast } = useToast();
+  const { data: session, status: sessionStatus } = useSession();
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
-      router.push("/login?callbackUrl=/dashboard/listings")
-      return
+      router.push("/login?callbackUrl=/dashboard/listings");
+      return;
     }
 
     if (sessionStatus === "authenticated") {
       // Fetch product data
       fetch(`/api/products/${params.id}`)
         .then((res) => {
-          if (!res.ok) throw new Error("Product not found")
-          return res.json()
+          if (!res.ok) throw new Error("Product not found");
+          return res.json();
         })
         .then((data) => {
-          const product = data.product
+          const product = data.product;
 
           // Check if the product belongs to the current user
           if (product.userId !== session?.user?.id) {
@@ -75,36 +76,36 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
               title: "Unauthorized",
               description: "You don't have permission to edit this listing",
               variant: "destructive",
-            })
-            router.push("/dashboard/listings")
-            return
+            });
+            router.push("/dashboard/listings");
+            return;
           }
 
-          setTitle(product.title)
-          setDescription(product.description)
-          setPrice(product.price.toString())
-          setCategory(product.category)
-          setCondition(product.condition)
-          setLocation(product.location || "")
-          setStatus(product.status)
-          setImages(product.images.map((img: any) => img.url))
-          setIsFetching(false)
+          setTitle(product.title);
+          setDescription(product.description);
+          setPrice(product.price.toString());
+          setCategory(product.category);
+          setCondition(product.condition);
+          setLocation(product.location || "");
+          setStatus(product.status);
+          setImages(product.images.map((img: any) => img.url));
+          setIsFetching(false);
         })
         .catch((error) => {
-          console.error("Error fetching product:", error)
+          console.error("Error fetching product:", error);
           toast({
             title: "Error",
             description: "Failed to load product details",
             variant: "destructive",
-          })
-          router.push("/dashboard/listings")
-        })
+          });
+          router.push("/dashboard/listings");
+        });
     }
-  }, [params.id, router, sessionStatus, session, toast])
+  }, [params.id, router, sessionStatus, session, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch(`/api/products/${params.id}`, {
@@ -122,30 +123,30 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
           status,
           images,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to update listing")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update listing");
       }
 
       toast({
         title: "Listing updated",
         description: "Your item has been updated successfully.",
-      })
+      });
 
-      router.push("/dashboard/listings")
-      router.refresh()
+      router.push("/dashboard/listings");
+      router.refresh();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isFetching) {
     return (
@@ -156,7 +157,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -272,5 +273,5 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
         </form>
       </div>
     </div>
-  )
+  );
 }

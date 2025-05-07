@@ -1,55 +1,54 @@
-import { NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { prisma } from "@/lib/db"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+
+export async function GET(request: Request) {
+  const session = await getSession();
+
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const partnerId = searchParams.get("partnerId");
+
+  if (!partnerId) {
+    return NextResponse.json({ error: "Missing partnerId" }, { status: 400 });
+  }
+
+  const messages = await prisma.message.findMany({
+    where: {
+      OR: [
+        { senderId: session.user.id, receiverId: partnerId },
+        { senderId: partnerId, receiverId: session.user.id },
+      ],
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return NextResponse.json({ messages });
+}
 
 export async function POST(request: Request) {
-  try {
-    const session = await auth()
+  const session = await getSession();
 
-    if (!session?.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-    }
-
-    const senderId = session.user.id
-    const { content, receiverId } = await request.json()
-
-    // Validate input
-    if (!content || !receiverId) {
-      return NextResponse.json({ message: "Missing required fields" }, { status: 400 })
-    }
-
-    // Check if receiver exists
-    const receiver = await prisma.user.findUnique({
-      where: {
-        id: receiverId,
-      },
-    })
-
-    if (!receiver) {
-      return NextResponse.json({ message: "Receiver not found" }, { status: 404 })
-    }
-
-    // Create message
-    const message = await prisma.message.create({
-      data: {
-        content,
-        senderId,
-        receiverId,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-      },
-    })
-
-    return NextResponse.json({ message }, { status: 201 })
-  } catch (error) {
-    console.error("Message creation error:", error)
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 })
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const { content, receiverId } = await request.json();
+
+  if (!content || !receiverId) {
+    return NextResponse.json({ error: "Missing content or receiverId" }, { status: 400 });
+  }
+
+  const message = await prisma.message.create({
+    data: {
+      content,
+      senderId: session.user.id,
+      receiverId,
+    },
+  });
+
+  return NextResponse.json({ message });
 }
