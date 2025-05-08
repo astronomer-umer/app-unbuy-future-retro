@@ -1,32 +1,16 @@
-"use client"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { signIn } from "next-auth/react";
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/hooks/use-auth"
-import { Loader2 } from "lucide-react"
-import { ImageUpload } from "@/components/image-upload"
-
-export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [profilePicture, setProfilePicture] = useState(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
-  const { signIn, isLoading } = useAuth()
+export default function RegisterPopup({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/register", {
@@ -38,156 +22,98 @@ export default function RegisterPage() {
           name,
           email,
           password,
-          profilePicture,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to register")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to register");
       }
 
-      toast({
-        title: "Account created",
-        description: "You have successfully registered. Signing you in...",
-      })
-
-      // Sign in the user after successful registration
-      const result = await signIn("credentials", {
-        email,
-        password,
-      })
-
-      if (result?.error) {
-        throw new Error("Failed to sign in after registration")
-      }
-
-      router.push("/dashboard")
-      router.refresh()
+      alert("Account created successfully. Redirecting to login...");
+      onClose(); // Close the popup
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      })
+      alert(error.message || "Something went wrong. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  const handleGoogleSignIn = () => {
-    signIn("google")
-  }
-
-  const isButtonDisabled = isSubmitting || isLoading
+  const handleSignInRedirect = () => {
+    window.location.href = "/login"; // Redirect to the login page
+  };
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-          <p className="text-sm text-muted-foreground">Enter your information to create an account</p>
-        </div>
-        <div className="grid gap-6">
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={isButtonDisabled}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isButtonDisabled}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isButtonDisabled}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="profilePicture">Profile Picture</Label>
-                <ImageUpload value={profilePicture} onChange={setProfilePicture} maxFiles={1} />
-              </div>
-              <Button type="submit" disabled={isButtonDisabled}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-            </div>
-          </form>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div
+        className="absolute inset-0 backdrop-blur-sm bg-lime-800 bg-opacity-30"
+        onClick={onClose} // Close modal when clicking outside
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
+      >
+        <h2 className="text-xl font-semibold mb-4">Create an Account</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
           </div>
-          <Button variant="outline" type="button" onClick={handleGoogleSignIn} disabled={isButtonDisabled}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Google"
-            )}
-          </Button>
-          <Button variant="outline" type="button" onClick={() => signIn("instagram")} disabled={isButtonDisabled}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Instagram"
-            )}
-          </Button>
-          <Button variant="outline" type="button" onClick={() => signIn("microsoft")} disabled={isButtonDisabled}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Microsoft"
-            )}
-          </Button>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating Account..." : "Sign Up"}
+          </button>
+        </form>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-lime-900">Already have an account?</p>
+          <button
+            onClick={handleSignInRedirect}
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            Sign In
+          </button>
         </div>
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-            Sign in
-          </Link>
-        </p>
-      </div>
+      </motion.div>
     </div>
-  )
+  );
 }

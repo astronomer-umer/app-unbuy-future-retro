@@ -1,5 +1,5 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import SearchBox from "@/components/search-box";
 import LoginPopup from "@/app/login/page";
@@ -11,10 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLoginPopup } from "@/hooks/use-LoginPopup";
+import { useRouter } from "next/router";
 
 export default function Header() {
   const { data: session } = useSession();
-  const { isLoginPopupOpen, openLoginPopup, closeLoginPopup, handleClosePopup } = useLoginPopup();
+  const { isLoginPopupOpen, openLoginPopup, closeLoginPopup } = useLoginPopup();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" }); // Redirect to the homepage after logout
+  };
 
   return (
     <header className="via-blue-100 from-lime-50 bg-gradient-to-br to-lime-100 shadow-xl text-lime-700 p-4">
@@ -23,7 +29,8 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="w-10 h-10 " />
             <h1 className="text-2xl font-bold">unBuy</h1>
-          </Link></div>
+          </Link>
+        </div>
         <SearchBox />
         <nav className="hidden md:flex gap-4">
           {session?.user ? (
@@ -35,37 +42,16 @@ export default function Header() {
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>
-                  <Link href="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/logout">Logout</Link>
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/dashboard")}>Dashboard</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <button
               onClick={openLoginPopup}
-              className="hover:bg-blue-50 text-lime-900 transition-all hover:text-blue-900 p-2 rounded-md font-medium duration-500 flex items-center gap-2"
+                className="bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5.121 17.804A10.97 10.97 0 0112 15c2.21 0 4.21.636 5.879 1.804M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-              Sign in
+                Login
             </button>
           )}
         </nav>
@@ -73,7 +59,7 @@ export default function Header() {
       {isLoginPopupOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={handleClosePopup}
+          onClick={closeLoginPopup}
         >
           <div className="relative bg-white p-6 rounded-lg shadow-lg popup-content">
             <button

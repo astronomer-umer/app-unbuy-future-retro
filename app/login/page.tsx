@@ -22,6 +22,10 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
     window.location.href = "/register"; // Redirect to the registration page
   };
 
+  const handleForgotPassword = () => {
+    window.location.href = "/forgot-password"; // Redirect to the forgot password page
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle sign-in logic here
@@ -38,7 +42,7 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.8 }}
-        className="bg-gradient-to-bl from-lime-200 via-lime-100 to-blue-200 p-6 rounded-lg shadow-lg relative w-full max-w-md"
+        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
       >
         <button
           onClick={onClose}
@@ -46,71 +50,39 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
         >
           ✕
         </button>
-        <h1 className="text-2xl font-bold text-lime-900 mb-2">Sign in to your account</h1>
-        <div className="py-3 px-10">
-
-          <div className="text-center">
-            {/* <p className="text-sm text-lime-900">Or sign in with your email:</p> */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-left font-bold  text-lime-900">Email:</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2 border border-lime-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-left font-bold  text-lime-900">Password:</label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2 border border-lime-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your password"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-900 text-white py-2 mt-4 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Sign in
-              </button>
-            </form>
-            <div className="mt-6 space-y-2">
-              <button
-                onClick={() => handleProviderLogin("google")}
-                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
-              >
-                Sign in with Google
-              </button>
-              <button
-                onClick={() => handleProviderLogin("instagram")}
-                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
-              >
-                Sign in with Instagram
-              </button>
-              <button
-                onClick={() => handleProviderLogin("microsoft")}
-                className="w-full bg-lime-800 text-white py-1 px-2 rounded hover:bg-lime-600"
-              >
-                Sign in with Microsoft
-              </button>
-            </div>
-            <div className="mt-4 text-center">
-              <p className="text-sm text-lime-900">Don't have an account?</p>
-              <button
-                onClick={handleSignUpRedirect}
-                className="text-blue-500 underline hover:text-blue-700"
-              >
-                Sign Up
-              </button>
-            </div>
-          </div></div>
+        <h2 className="text-xl font-semibold mb-4">Sign In</h2>
+        <div className="space-y-4">
+          <button
+            onClick={() => handleProviderLogin("google")}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          >
+            Sign in with Google
+          </button>
+          <button
+            onClick={() => handleProviderLogin("microsoft")}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          >
+            Sign in with Microsoft
+          </button>
+        </div>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-lime-900">Forgot your password?</p>
+          <button
+            onClick={handleForgotPassword}
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            Reset Password
+          </button>
+        </div>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-lime-900">Don't have an account?</p>
+          <button
+            onClick={handleSignUpRedirect}
+            className="text-blue-500 underline hover:text-blue-700"
+          >
+            Sign Up
+          </button>
+        </div>
       </motion.div>
     </div>
   );
